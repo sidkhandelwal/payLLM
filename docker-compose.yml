@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  dialogue-cache:
+    image: redis:7.2-alpine
+    container_name: bank-dialogue-cache
+    ports:
+      - "6379:6379"
+
+  banking-mcp-server:
+    build:
+      context: ./banking-mcp-server
+      dockerfile: ../Dockerfile.server
+    container_name: bank-mcp-server
+    ports:
+      - "8081:8081"
+
+  ai-orchestrator:
+    build:
+      context: ./banking-ai-orchestrator
+      dockerfile: ../Dockerfile.client
+    container_name: bank-ai-orchestrator
+    ports:
+      - "8080:8080"
+    depends_on:
+      - dialogue-cache
+      - banking-mcp-server
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SPRING_AI_MCP_CLIENT_STREAMABLE_HTTP_CONNECTIONS_GOVERNANCE_HUB_URL=http://bank-mcp-server:8081/mcp
+      - SPRING_DATA_REDIS_HOST=bank-dialogue-cache
+      - SPRING_DATA_REDIS_PORT=6379

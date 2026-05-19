@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enterprise Corporate AI Banking Terminal</title>
+    <style>
+        body { font-family: sans-serif; background: #F8F9FA; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .chat-container { width: 450px; height: 600px; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+        .chat-header { background: #0A2540; color: white; padding: 15px; font-weight: bold; }
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px; border-radius: 6px; max-width: 80%; font-size: 14px; }
+        .msg.user { background: #635BFF; color: white; align-self: flex-end; }
+        .msg.ai { background: #ECEFF1; align-self: flex-start; }
+        .chat-input { padding: 15px; border-top: 1px solid #E5E9F0; display: flex; gap: 10px; }
+        .chat-input input { flex: 1; padding: 10px; border: 1px solid #CCC; border-radius: 4px; }
+        .chat-input button { background: #635BFF; color: white; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <div class="chat-header">Treasury AI Assistant Terminal</div>
+    <div class="chat-messages" id="box">
+        <div class="msg ai">Access Authenticated. How can I assist with your corporate transfers today?</div>
+    </div>
+    <div class="chat-input">
+        <input type="text" id="inp" placeholder="Type here...">
+        <button onclick="send()">Send</button>
+    </div>
+</div>
+<script>
+    async function send() {
+        let i = document.getElementById('inp'); if(!i.value.trim()) return;
+        append(i.value, 'user');
+        try {
+            let res = await fetch('http://localhost:8080/api/v1/banking/chat', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({message: i.value})
+            });
+            let d = await res.json(); append(d.reply, 'ai');
+        } catch { append('Error communicating with runtime engine.', 'ai'); }
+        i.value = '';
+    }
+    function append(t, s) {
+        let b = document.getElementById('box'); let m = document.createElement('div');
+        m.className = 'msg ' + s; m.innerText = t; b.appendChild(m); b.scrollTop = b.scrollHeight;
+    }
+</script>
+</body>
+</html>
